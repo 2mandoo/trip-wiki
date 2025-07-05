@@ -1,18 +1,49 @@
-export default function CityList() {
+export default function CityList({ $app, initialState, handleLoadMore }) {
+    this.state = initialState; // 1. ''
+    
+    this.handleLoadMore = handleLoadMore;
+
     this.$target = document.createElement('div');
     this.$target.className = 'city-list';
+    $app.appendChild(this.$target);
+
+    
     
     this.template = () => {
-
+        let temp = `<div class="city-items-container">`;
+        
+        if (this.state) {
+            this.state.cities.forEach((city) => {
+                temp += `
+                <div class="city-item" id=${city.id}>
+                    <img src=${city.image}></img>
+                    <div class="city-item-info">${city.city}, ${city.country}</div>
+                    <div class="city-item-score">⭐️ ${city.total}</div>
+                </div>`;
+            });
+        }
+        temp += `</div>`;
+        return temp;
     };
 
-     this.render = () => {
+    this.render = () => {
+        this.$target.innerHTML = this.template();
 
+        if (!this.state.isEnd) {
+            const $loadMoreButton = document.createElement('button');
+            $loadMoreButton.className = 'add-items-btn';
+            $loadMoreButton.textContent = '+ 더보기';
+            this.$target.appendChild($loadMoreButton);
+
+            $loadMoreButton.addEventListener('click', () => {
+                this.handleLoadMore();
+            })
+        }
     };
 
     //현재 상태를 새로운 상태로 업데이트
     this.setState = (newState) => {
-        this.state = newState;
+        this.state = newState; // 3. cities: {cities:[{}, {}, ...], isEnd:false}
         this.render();
     }
 

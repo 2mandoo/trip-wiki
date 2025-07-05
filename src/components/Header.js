@@ -1,6 +1,6 @@
 export default function Header() {
-    // this.$target = document.createElement('div');
-    // this.$target.className = 'header';
+    this.$target = document.createElement('div');
+    this.$target.className = 'header';
     
     this.template = () => {
 
@@ -15,10 +15,8 @@ export default function Header() {
         this.state = newState;
         this.render();
     }
-
+    
     //render 호출
     this.render();
-    console.log(this);
 }
 
-console.log(new Header());
