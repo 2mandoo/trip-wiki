@@ -5,15 +5,73 @@ import CityDetail from "./components/CityDetail.js";
 import { request } from "./components/api.js";
 
 export default function App($app) {
+    //새로고침하면 정렬 값과 검색어가 적용되지 않음. 새로고침 했을 때 state 값을 알맞게 설정해줘야 함
+    //새로고침 시 웹사이트의 주소를 확인해서 state 값을 알맞게 업데이트 해준다.
+    const getSortBy = () => {
+        if (window.location.search) {
+            return window.location.search.split('sort=')[1].split('&')[0];
+        } else {
+            return 'total';
+        }
+    }
+
+    const getSearchWord = () => {
+        if (window.location.search && window.location.search.includes("search=")) {
+            return window.location.search.split('search=')[1];
+        }
+        return '';
+    }
+
     this.state = {
         startIdx: 0,
-        sortBy: '',
-        searchWord: '',
+        sortBy: getSortBy(),
+        searchWord: getSearchWord(),
         region: '',
         cities: ''
     };
 
-    const header = new Header();
+    const header = new Header({
+        $app,
+        initialState: { sortBy: this.state.sortBy, searchWord: this.state.searchWord },
+        handleSortChange: async (sortBy) => {
+            const pageUrl = `/${this.state.region}?sort=${sortBy}`;
+            //웹페이지 주소 변경
+            history.pushState(
+                null,
+                null,
+                this.state.searchWord ? pageUrl + `&search=${this.state.searchWord}` : pageUrl
+            )
+            //정렬 기준이 적용된 새로운 데이터 가져오기
+            const cities = await request(0, this.state.region, sortBy, this.state.searchWord);
+            
+            //상태 변경
+            this.setState({
+                ...this.state,
+                startIdx: 0,
+                sortBy: sortBy,
+                cities: cities
+            })
+        },
+        handleSearch: async (searchWord) => {
+            //새로운 주소로 이동
+            history.pushState(
+                null,
+                null,
+                `${this.state.region}?sort=${this.state.sortBy}&search=${searchWord}`
+            );
+
+            //검색 결과 가져오기
+            const cities = await request(0, this.state.region, this.state.sortBy, searchWord);
+
+            //상태 변경
+            this.setState({
+                ...this.state,
+                startIdx: 0,
+                searchWord: searchWord,
+                cities: cities,
+            })
+        }
+    });
     const regionegionList = new RegionList();
     const cityList = new CityList({ 
         $app, 
@@ -40,12 +98,12 @@ export default function App($app) {
     this.setState = (newState) => {
         this.state = newState; 
         cityList.setState(this.state.cities);
+        header.setState({ sortBy: this.state.sortBy, searchWord: this.state.searchWord });
     }
 
     //함수 내부 전용 초기화 함수, 외부에서 호출 불가능
     const init = async () => {
         const cities = await request(this.state.startIdx, this.state.region, this.state.sortBy, this.state.searchWord);
-        console.log(cities);
         
         this.setState({
             ...this.state,
