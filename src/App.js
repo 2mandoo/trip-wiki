@@ -2,7 +2,7 @@ import Header from "./components/Header.js";
 import RegionList from "./components/RegionList.js";
 import CityList from "./components/CityList.js";
 import CityDetail from "./components/CityDetail.js";
-import { request } from "./components/api.js";
+import { request, requestCityDetail } from "./components/api.js";
 
 export default function App($app) {
     //새로고침하면 정렬 값과 검색어가 적용되지 않음. 새로고침 했을 때 state 값을 알맞게 설정해줘야 함
@@ -35,7 +35,7 @@ export default function App($app) {
     const renderHeader = () => {
         new Header({
             $app,
-            initialState: { sortBy: this.state.sortBy, searchWord: this.state.searchWord },
+            initialState: { sortBy: this.state.sortBy, searchWord: this.state.searchWord, currentPage: this.state.currentPage },
             handleSortChange: async (sortBy) => {
                 const pageUrl = `/${this.state.region}?sort=${sortBy}`;
                 //웹페이지 주소 변경
@@ -126,8 +126,13 @@ export default function App($app) {
         });
     }
     
-    const renderCityDetail = () => {
-        new CityDetail();
+    const renderCityDetail = async (cityId) => {
+        try {
+            const cityDetailData = await requestCityDetail(cityId);
+            new CityDetail({ $app, initialState: cityDetailData });
+        } catch(err) {
+            console.log(err);
+        }
     }
 
     //외부에서 직접 호출 가능
@@ -142,8 +147,9 @@ export default function App($app) {
 
         //상세페이지 렌더링
         if (path.startsWith('/city/')) {
+            const cityId = path.split('/city/')[1];
             renderHeader();
-            renderCityDetail();
+            renderCityDetail(cityId);
         } else {
             //메인페이지 렌더링
             renderHeader();
