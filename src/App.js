@@ -26,10 +26,11 @@ export default function App($app) {
         startIdx: 0,
         sortBy: getSortBy(),
         searchWord: getSearchWord(),
-        region: '',
+        region: window.location.pathname.replace('/', ''),
         cities: '',
         currentPage: window.location.pathname, //메인페이지, 상세페이지 구분
     };
+    
 
     //함수 호출시 새로운 헤더 인스턴스 생성(다시 렌더링)
     const renderHeader = () => {
@@ -38,7 +39,7 @@ export default function App($app) {
             initialState: { sortBy: this.state.sortBy, searchWord: this.state.searchWord, currentPage: this.state.currentPage },
             handleSortChange: async (sortBy) => {
                 const pageUrl = `/${this.state.region}?sort=${sortBy}`;
-                //웹페이지 주소 변경
+                //웹페이지 url 변경
                 history.pushState(
                     null,
                     null,
@@ -56,7 +57,7 @@ export default function App($app) {
                 })
             },
             handleSearch: async (searchWord) => {
-                //새로운 주소로 이동
+                //새로운 url로 이동
                 history.pushState(
                     null,
                     null,
@@ -103,6 +104,7 @@ export default function App($app) {
             $app, 
             initialState: this.state.cities,
             handleLoadMore: async () => {
+                //더보기 버튼 클릭했을 때
                 const newStartIdx = this.state.startIdx + 40;
                 const newCities = await request(newStartIdx, this.state.region, this.state.sortBy, this.state.searchWord);
                 // newCities = {cities:[{}, {}, ...], isEnd:false}
@@ -192,6 +194,8 @@ export default function App($app) {
                 this.state.sortBy, 
                 this.state.searchWord
             );
+            console.log("init 에서 region");
+            console.log(this.state.region);
             
             this.setState({
                 ...this.state,

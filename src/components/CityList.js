@@ -37,6 +37,7 @@ export default function CityList({ $app, initialState, handleLoadMore, handleIte
             })
         })
 
+        //데이터가 더 있을 때만 버튼 보이도록
         if (!this.state.isEnd) {
             const $loadMoreButton = document.createElement('button');
             $loadMoreButton.className = 'add-items-btn';
