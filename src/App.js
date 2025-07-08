@@ -27,91 +27,130 @@ export default function App($app) {
         sortBy: getSortBy(),
         searchWord: getSearchWord(),
         region: '',
-        cities: ''
+        cities: '',
+        currentPage: window.location.pathname, //메인페이지, 상세페이지 구분
     };
 
-    const header = new Header({
-        $app,
-        initialState: { sortBy: this.state.sortBy, searchWord: this.state.searchWord },
-        handleSortChange: async (sortBy) => {
-            const pageUrl = `/${this.state.region}?sort=${sortBy}`;
-            //웹페이지 주소 변경
-            history.pushState(
-                null,
-                null,
-                this.state.searchWord ? pageUrl + `&search=${this.state.searchWord}` : pageUrl
-            )
-            //정렬 기준이 적용된 새로운 데이터 가져오기
-            const cities = await request(0, this.state.region, sortBy, this.state.searchWord);
-            
-            //상태 변경
-            this.setState({
-                ...this.state,
-                startIdx: 0,
-                sortBy: sortBy,
-                cities: cities
-            })
-        },
-        handleSearch: async (searchWord) => {
-            //새로운 주소로 이동
-            history.pushState(
-                null,
-                null,
-                `${this.state.region}?sort=${this.state.sortBy}&search=${searchWord}`
-            );
+    //함수 호출시 새로운 헤더 인스턴스 생성(다시 렌더링)
+    const renderHeader = () => {
+        new Header({
+            $app,
+            initialState: { sortBy: this.state.sortBy, searchWord: this.state.searchWord },
+            handleSortChange: async (sortBy) => {
+                const pageUrl = `/${this.state.region}?sort=${sortBy}`;
+                //웹페이지 주소 변경
+                history.pushState(
+                    null,
+                    null,
+                    this.state.searchWord ? pageUrl + `&search=${this.state.searchWord}` : pageUrl
+                )
+                //정렬 기준이 적용된 새로운 데이터 가져오기
+                const cities = await request(0, this.state.region, sortBy, this.state.searchWord);
+                
+                //상태 변경
+                this.setState({
+                    ...this.state,
+                    startIdx: 0,
+                    sortBy: sortBy,
+                    cities: cities
+                })
+            },
+            handleSearch: async (searchWord) => {
+                //새로운 주소로 이동
+                history.pushState(
+                    null,
+                    null,
+                    `${this.state.region}?sort=${this.state.sortBy}&search=${searchWord}`
+                );
 
-            //검색 결과 가져오기
-            const cities = await request(0, this.state.region, this.state.sortBy, searchWord);
+                //검색 결과 가져오기
+                const cities = await request(0, this.state.region, this.state.sortBy, searchWord);
 
-            //상태 변경
-            this.setState({
-                ...this.state,
-                startIdx: 0,
-                searchWord: searchWord,
-                cities: cities,
-            })
-        }
-    });
+                //상태 변경
+                this.setState({
+                    ...this.state,
+                    startIdx: 0,
+                    searchWord: searchWord,
+                    cities: cities,
+                })
+            }
+        });
+    }
 
-    const regionList = new RegionList({
-        $app,
-        initialState: this.state.region,
-        handleRegion: async (region) => {
-            console.log("handleRegion");
-            console.log(region);
-            history.pushState(null, null, `/${region}?sort=total`);
-            const cities = await request(0, region, 'total');
-            console.log(cities);
-            this.setState({
-                ...this.state,
-                startIdx: 0,
-                region: region,
-                searchWord: '',
-                cities: cities
-            });
-        }
-    });
+    const renderRegionList = () => {
+        new RegionList({
+            $app,
+            initialState: this.state.region,
+            handleRegion: async (region) => {
+                console.log("handleRegion");
+                console.log(region);
+                history.pushState(null, null, `/${region}?sort=total`);
+                const cities = await request(0, region, 'total');
+                console.log(cities);
+                this.setState({
+                    ...this.state,
+                    startIdx: 0,
+                    region: region,
+                    searchWord: '',
+                    cities: cities
+                });
+            }
+        });
+    }
 
-    const cityList = new CityList({ 
-        $app, 
-        initialState: this.state.cities,
-        handleLoadMore: async () => {
-            const newStartIdx = this.state.startIdx + 40;
-            const newCities = await request(newStartIdx, this.state.region, this.state.sortBy, this.state.searchWord);
-            // newCities = {cities:[{}, {}, ...], isEnd:false}
-            console.log(this.state.cities); //{cities:[{}, {}, ...], isEnd:false}
-            this.setState({
-                ...this.state,
-                startIdx: newStartIdx,
-                cities: {
-                    cities: [...this.state.cities.cities, ...newCities.cities],
-                    isEnd: newCities.isEnd,
-                }
-            })
-        }
-    });
+    const renderCityList = () => {
+        new CityList({ 
+            $app, 
+            initialState: this.state.cities,
+            handleLoadMore: async () => {
+                const newStartIdx = this.state.startIdx + 40;
+                const newCities = await request(newStartIdx, this.state.region, this.state.sortBy, this.state.searchWord);
+                // newCities = {cities:[{}, {}, ...], isEnd:false}
+                console.log(this.state.cities); //{cities:[{}, {}, ...], isEnd:false}
+                this.setState({
+                    ...this.state,
+                    startIdx: newStartIdx,
+                    cities: {
+                        cities: [...this.state.cities.cities, ...newCities.cities],
+                        isEnd: newCities.isEnd,
+                    }
+                })
+            },
+            handleItemClick: (id) => {
+                history.pushState(null, null, `/city/${id}`);
+                this.setState({
+                    ...this.state,
+                    currentPage: `/city/${id}`,
+                })
+            }
+        });
+    }
     
-    const cityDetail = new CityDetail();
+    const renderCityDetail = () => {
+        new CityDetail();
+    }
+
+    //외부에서 직접 호출 가능
+    this.setState = (newState) => {
+        this.state = newState; 
+        render();
+    }
+
+    const render = () => {
+        const path = this.state.currentPage;
+        $app.innerHTML = '';
+
+        //상세페이지 렌더링
+        if (path.startsWith('/city/')) {
+            renderHeader();
+            renderCityDetail();
+        } else {
+            //메인페이지 렌더링
+            renderHeader();
+            renderRegionList();
+            renderCityList();
+        }
+    }
 
     //뒤로가기, 앞으로가기
     window.addEventListener('popstate', async () => {
@@ -129,28 +168,32 @@ export default function App($app) {
             sortBy: prevSortBy,
             region: prevRegion,
             searchWord: prevSearchWord,
-            cities: prevCities
+            cities: prevCities,
+            currentPage: urlPath,
         });
     });
 
-
-    //외부에서 직접 호출 가능
-    this.setState = (newState) => {
-        this.state = newState; 
-        cityList.setState(this.state.cities);
-        header.setState({ sortBy: this.state.sortBy, searchWord: this.state.searchWord });
-        regionList.setState(this.state.region);
-    }
-
     //함수 내부 전용 초기화 함수, 외부에서 호출 불가능
     const init = async () => {
-        const cities = await request(this.state.startIdx, this.state.region, this.state.sortBy, this.state.searchWord);
+        const path = this.state.currentPage;
+
+        if (path.startsWith('/city/')) {
+            render();
+        } else {
+            const cities = await request(
+                this.state.startIdx, 
+                this.state.region, 
+                this.state.sortBy, 
+                this.state.searchWord
+            );
+            
+            this.setState({
+                ...this.state,
+                cities: cities, // 2. cities: {cities:[{}, {}, ...], isEnd:false}
+            });
+        }
         
-        this.setState({
-            ...this.state,
-            cities: cities, // 2. cities: {cities:[{}, {}, ...], isEnd:false}
-        });
     }
     
     init();
-}
+}   

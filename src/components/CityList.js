@@ -1,7 +1,8 @@
-export default function CityList({ $app, initialState, handleLoadMore }) {
+export default function CityList({ $app, initialState, handleLoadMore, handleItemClick }) {
     this.state = initialState; // 1. ''
     
     this.handleLoadMore = handleLoadMore;
+    this.handleItemClick = handleItemClick;
 
     this.$target = document.createElement('div');
     this.$target.className = 'city-list';
@@ -29,6 +30,12 @@ export default function CityList({ $app, initialState, handleLoadMore }) {
 
     this.render = () => {
         this.$target.innerHTML = this.template();
+
+        this.$target.querySelectorAll('div.city-item').forEach((e) => {
+            e.addEventListener('click', () => {
+                this.handleItemClick(e.id);
+            })
+        })
 
         if (!this.state.isEnd) {
             const $loadMoreButton = document.createElement('button');
