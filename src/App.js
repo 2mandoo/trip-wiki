@@ -30,13 +30,16 @@ export default function App($app) {
         cities: '',
         currentPage: window.location.pathname, //메인페이지, 상세페이지 구분
     };
-    
 
-    //함수 호출시 새로운 헤더 인스턴스 생성(다시 렌더링)
+    //함수 호출시 새로운 헤더 인스턴스 생성(함수 호출할 때 마다 다시 렌더링)
     const renderHeader = () => {
         new Header({
             $app,
-            initialState: { sortBy: this.state.sortBy, searchWord: this.state.searchWord, currentPage: this.state.currentPage },
+            initialState: { 
+                sortBy: this.state.sortBy, 
+                searchWord: this.state.searchWord, 
+                currentPage: this.state.currentPage 
+            },
             handleSortChange: async (sortBy) => {
                 const pageUrl = `/${this.state.region}?sort=${sortBy}`;
                 //웹페이지 url 변경
@@ -44,7 +47,7 @@ export default function App($app) {
                     null,
                     null,
                     this.state.searchWord ? pageUrl + `&search=${this.state.searchWord}` : pageUrl
-                )
+                );
                 //정렬 기준이 적용된 새로운 데이터 가져오기
                 const cities = await request(0, this.state.region, sortBy, this.state.searchWord);
                 
@@ -54,14 +57,14 @@ export default function App($app) {
                     startIdx: 0,
                     sortBy: sortBy,
                     cities: cities
-                })
+                });
             },
             handleSearch: async (searchWord) => {
                 //새로운 url로 이동
                 history.pushState(
                     null,
                     null,
-                    `${this.state.region}?sort=${this.state.sortBy}&search=${searchWord}`
+                    `/${this.state.region}?sort=${this.state.sortBy}&search=${searchWord}`
                 );
 
                 //검색 결과 가져오기
@@ -83,17 +86,19 @@ export default function App($app) {
             $app,
             initialState: this.state.region,
             handleRegion: async (region) => {
-                console.log("handleRegion");
-                console.log(region);
+                region = region === 'All' ? '' : region;
                 history.pushState(null, null, `/${region}?sort=total`);
+                
                 const cities = await request(0, region, 'total');
-                console.log(cities);
+                
                 this.setState({
                     ...this.state,
                     startIdx: 0,
+                    sortBy: 'total',
                     region: region,
                     searchWord: '',
-                    cities: cities
+                    cities: cities,
+                    currentPage: `/${region}`,
                 });
             }
         });
@@ -107,8 +112,7 @@ export default function App($app) {
                 //더보기 버튼 클릭했을 때
                 const newStartIdx = this.state.startIdx + 40;
                 const newCities = await request(newStartIdx, this.state.region, this.state.sortBy, this.state.searchWord);
-                // newCities = {cities:[{}, {}, ...], isEnd:false}
-                console.log(this.state.cities); //{cities:[{}, {}, ...], isEnd:false}
+
                 this.setState({
                     ...this.state,
                     startIdx: newStartIdx,
@@ -143,6 +147,7 @@ export default function App($app) {
         render();
     }
 
+    //뷰 렌더링
     const render = () => {
         const path = this.state.currentPage;
         $app.innerHTML = '';
@@ -182,10 +187,12 @@ export default function App($app) {
     });
 
     //함수 내부 전용 초기화 함수, 외부에서 호출 불가능
+    //init: 초기 데이터 로딩
     const init = async () => {
         const path = this.state.currentPage;
 
-        if (path.startsWith('/city/')) {
+        //상세 페이지
+        if (path.startsWith('/city/')) { 
             render();
         } else {
             const cities = await request(
@@ -194,13 +201,8 @@ export default function App($app) {
                 this.state.sortBy, 
                 this.state.searchWord
             );
-            console.log("init 에서 region");
-            console.log(this.state.region);
             
-            this.setState({
-                ...this.state,
-                cities: cities, // 2. cities: {cities:[{}, {}, ...], isEnd:false}
-            });
+            this.setState({ ...this.state, cities: cities });
         }
         
     }

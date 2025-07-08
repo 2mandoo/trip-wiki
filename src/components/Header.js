@@ -11,7 +11,7 @@ export default function Header({ $app, initialState, handleSortChange, handleSea
   
     this.template = () => {
         const { sortBy, searchWord, currentPage } = this.state;
-
+       
         let temp = `
             <div class="title">
                 <a href="/">✈️ Trip Wiki</a>
@@ -60,10 +60,10 @@ export default function Header({ $app, initialState, handleSortChange, handleSea
     };
 
     //현재 상태를 새로운 상태로 업데이트
-    this.setState = (newState) => {
-        this.state = newState;
-        this.render();
-    }
+    // this.setState = (newState) => {
+    //     this.state = newState;
+    //     this.render();
+    // }
 
     //render 호출
     this.render();

@@ -1,5 +1,5 @@
 export default function CityList({ $app, initialState, handleLoadMore, handleItemClick }) {
-    this.state = initialState; // 1. ''
+    this.state = initialState;
     
     this.handleLoadMore = handleLoadMore;
     this.handleItemClick = handleItemClick;
@@ -13,8 +13,6 @@ export default function CityList({ $app, initialState, handleLoadMore, handleIte
         let temp = `<div class="city-items-container">`;
         
         if (this.state) {
-            console.log("cityList");
-            console.log(this.state);
             this.state.cities.forEach((city) => {
                 temp += `
                 <div class="city-item" id=${city.id}>
@@ -51,10 +49,10 @@ export default function CityList({ $app, initialState, handleLoadMore, handleIte
     };
 
     //현재 상태를 새로운 상태로 업데이트
-    this.setState = (newState) => {
-        this.state = newState; // 3. cities: {cities:[{}, {}, ...], isEnd:false}
-        this.render();
-    }
+    // this.setState = (newState) => {
+    //     this.state = newState;
+    //     this.render();
+    // }
 
     //render 호출
     this.render();

@@ -34,8 +34,6 @@ export default function RegionList({ $app, initialState, handleRegion }) {
         this.$target.innerHTML = this.template();
 
         if (this.state) {
-            console.log("regionList render");
-            console.log(this.state);
             let $currentRegion = document.getElementById(this.state);
             $currentRegion && ($currentRegion.className = 'clicked');
         } else {
@@ -45,19 +43,16 @@ export default function RegionList({ $app, initialState, handleRegion }) {
         const $regionList = this.$target.querySelectorAll('div');
         $regionList.forEach((e) => {
             e.addEventListener('click', () => {
-                console.log('click');
-                console.log(e.id);
-
                 this.handleRegion(e.id);
             });
         });
     };
 
     //현재 상태를 새로운 상태로 업데이트
-    this.setState = (newState) => {
-        this.state = newState;
-        this.render();
-    }
+    // this.setState = (newState) => {
+    //     this.state = newState;
+    //     this.render();
+    // }
 
     //render 호출
     this.render();

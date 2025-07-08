@@ -80,15 +80,15 @@ export default function CityDetail({ $app, initialState }) {
         return temp;
     };
 
-     this.render = () => {
+    this.render = () => {
         this.$target.innerHTML = this.template();
     };
 
     //현재 상태를 새로운 상태로 업데이트
-    this.setState = (newState) => {
-        this.state = newState;
-        this.render();
-    }
+    // this.setState = (newState) => {
+    //     this.state = newState;
+    //     this.render();
+    // }
 
     //render 호출
     this.render();
