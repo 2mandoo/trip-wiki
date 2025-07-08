@@ -1,4 +1,4 @@
-const API_URL = 'https://trip-wiki-api.vercel.app'
+const API_URL = 'https://trip-wiki-api.vercel.app/'
 
 export const request = async (startIdx, region, sortBy, searchWord) => {
     try {
@@ -8,14 +8,13 @@ export const request = async (startIdx, region, sortBy, searchWord) => {
         } else {
             url += `?start=${startIdx}`;
         }
-        console.log()
         if (sortBy) {
             url += `&sort=${sortBy}`;
         }
         if (searchWord) {
             url += `&search=${searchWord}`;
         }
-    
+        console.log(url);
         const response = await fetch(url);
         if (response) {
             const data = await response.json();

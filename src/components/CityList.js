@@ -5,14 +5,15 @@ export default function CityList({ $app, initialState, handleLoadMore }) {
 
     this.$target = document.createElement('div');
     this.$target.className = 'city-list';
-    $app.appendChild(this.$target);
 
-    
+    $app.appendChild(this.$target);
     
     this.template = () => {
         let temp = `<div class="city-items-container">`;
         
         if (this.state) {
+            console.log("cityList");
+            console.log(this.state);
             this.state.cities.forEach((city) => {
                 temp += `
                 <div class="city-item" id=${city.id}>
